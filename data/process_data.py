@@ -1,16 +1,59 @@
 import sys
+import pandas as pd
+from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    """
+    It reads two csv files as pd.DataFrames and merges them on 'id'
+    :param messages_filepath: string, messages data, with columns: id, message, original and genre
+    :param categories_filepath: string, categories data, with columns: id, categories. categories is of the format:
+    <categorie_name_1>-<{1, 0}>;<categorie_name_2>-<{1, 0}>;...
+    :return: pd.DataFrame, returns a dataframe with the data joined on 'id'
+    """
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+    df = messages.merge(categories, on='id')
+    return df
 
 
 def clean_data(df):
-    pass
+    """
+    Takes the pd.DataFrame from the function load_data and expands the categories column into several columns with
+    numeric values. It also removes duplicates.
+    :param df: pd.DataFrame, dataframe from load_data
+    :return: pd.DataFrame, cleaned dataframe
+    """
+    categories = df.categories.str.split(';', expand=True)
+
+    row = categories.iloc[0, :]
+    category_colnames = row.str.split('-', expand=True)[0].values
+    categories.columns = category_colnames
+
+    for column in categories:
+        categories[column] = categories[column].str.split('-', expand=True)[1]
+        categories[column] = pd.to_numeric(categories[column])
+
+    df.drop('categories', axis=1, inplace=True)
+    df = pd.concat([df, categories], axis=1)
+    df.drop_duplicates(inplace=True)
+
+    return df
 
 
 def save_data(df, database_filename):
-    pass  
+    """
+    Function that will create a sqlite database and load a dataframe
+    :param df: pd.DataFrame, dataframe to load to the database
+    :param database_filename: str, valid file name of the database (no .db ending)
+    :return: None
+    """
+    engine = create_engine('sqlite:///{}.db'.format(database_filename))
+    try:
+        df.to_sql(database_filename, engine, if_exists='fail', index=False)
+    except ValueError:
+        print('That sqlite database already exists')
+    return None
 
 
 def main():
