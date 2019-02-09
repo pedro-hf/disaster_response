@@ -49,8 +49,9 @@ def save_data(df, database_filename):
     :return: None
     """
     engine = create_engine('sqlite:///{}.db'.format(database_filename))
+    table_name = database_filename.split('/')[-1]
     try:
-        df.to_sql(database_filename, engine, if_exists='fail', index=False)
+        df.to_sql(table_name, engine, if_exists='fail', index=False)
     except ValueError:
         print('That sqlite database already exists')
     return None

@@ -1,24 +1,80 @@
 import sys
+from sqlalchemy import create_engine
+import pandas as pd
+
+import nltk
+nltk.download(['punkt', 'wordnet'])
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.metrics import classification_report
+from joblib import dump
 
 
 def load_data(database_filepath):
-    pass
+    """
+    It loads data from a sqlite database and returns X (messages) and y (categories)
+    :param database_filepath: string, path to the database file.
+    :return: pd.Series, pd.DataFrame, list of strings. X is series with the messages, y is a dataframe with one-hot enconding of the
+    categories. category_names is a list of the names of the categories or columns of y.
+    """
+    if database_filepath.endswith('.db'):
+        database_filepath = database_filepath[:-3]
+    table_name = database_filepath.split('/')[-1]
+    engine = create_engine('sqlite:///{}.db'.format(database_filepath))
+    df = pd.read_sql_table(table_name, con=engine)
+    X = df.message
+    y = df.drop(['id', 'message', 'original', 'genre'], axis=1)
+    category_names = list(y.columns)
+    return X, y, category_names
 
 
 def tokenize(text):
-    pass
+    """
+    Tokenizer to be passed to the bag of Words
+    :param text: string, message to the tokenized
+    :return: list of strings, list of the tokens extracted from the text
+    """
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+    return [lemmatizer.lemmatize(t).lower().strip() for t in tokens]
 
 
 def build_model():
-    pass
+    """
+    Creates a machine learning pipeline including: a vectorizer, a TF-IDF transformer and a classifier
+    :return: returns a model
+    """
+    model = Pipeline([('vect', CountVectorizer(tokenizer=tokenize, max_df=0.5)),
+                      ('tfidf', TfidfTransformer(use_idf=True)),
+                      ('clf', MultiOutputClassifier(RandomForestClassifier(min_samples_split=2, n_estimators=50)))])
+    return model
 
 
-def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+def evaluate_model(model, X_test, y_test, category_names):
+    """
+    Function that prints to terminal the performance of the model
+    :param model: ml pipeline, model to evaluate.
+    :param X_test: pd.DataFrame, pd.Series or np.array. Test messages.
+    :param y_test: pd.DataFrame. one hot encoding dataframe with the true labels of X_test
+    :param category_names: list(strings). name of the categories.
+    :return: none, prints to screen
+    """
+    y_pred = model.predict(X_test)
+    for i, cat in enumerate(category_names):
+        print('######################## ' + cat + ' ########################')
+        print(classification_report(y_test[cat], y_pred[:, i]))
+    return None
 
 
 def save_model(model, model_filepath):
-    pass
+    """ saves model to model_filepath"""
+    dump(model, '{}.joblib'.format(model_filepath))
+    return None
 
 
 def main():
