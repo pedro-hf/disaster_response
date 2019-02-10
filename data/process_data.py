@@ -17,6 +17,20 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 
+def clean_bad_categories(df):
+    """Removes categories with one only value from a dataframe, returns the clean dataframe and prints a list of the
+    removed columns
+    """
+    bad_columns=[]
+    for col in df.columns:
+        if len(df[col].unique()) == 1:
+            df.drop(col, axis=1, inplace=True)
+            bad_columns.append(col)
+    if bad_columns:
+        print('The following categories take only one value and were removed: {}'.format(','.join(bad_columns)))
+    return df
+
+
 def clean_data(df):
     """
     Takes the pd.DataFrame from the function load_data and expands the categories column into several columns with
@@ -33,11 +47,11 @@ def clean_data(df):
     for column in categories:
         categories[column] = categories[column].str.split('-', expand=True)[1]
         categories[column] = pd.to_numeric(categories[column])
+    categories = clean_bad_categories(categories)
 
     df.drop('categories', axis=1, inplace=True)
     df = pd.concat([df, categories], axis=1)
     df.drop_duplicates(inplace=True)
-
     return df
 
 

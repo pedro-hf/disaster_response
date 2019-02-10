@@ -15,6 +15,7 @@ from sklearn.metrics import classification_report
 from joblib import dump
 
 
+
 def load_data(database_filepath):
     """
     It loads data from a sqlite database and returns X (messages) and y (categories)
@@ -49,9 +50,9 @@ def build_model():
     Creates a machine learning pipeline including: a vectorizer, a TF-IDF transformer and a classifier
     :return: returns a model
     """
-    model = Pipeline([('vect', CountVectorizer(tokenizer=tokenize, max_df=0.5)),
+    model = Pipeline([('vect', CountVectorizer(tokenizer=tokenize, max_df=0.3)),
                       ('tfidf', TfidfTransformer(use_idf=True)),
-                      ('clf', MultiOutputClassifier(RandomForestClassifier(min_samples_split=2, n_estimators=50)))])
+                      ('clf', MultiOutputClassifier(RandomForestClassifier(min_samples_split=2, n_estimators=200)))])
     return model
 
 
