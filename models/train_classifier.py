@@ -1,9 +1,7 @@
 import sys
 from sqlalchemy import create_engine
 import pandas as pd
-
 import nltk
-nltk.download(['punkt', 'wordnet'])
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from sklearn.pipeline import Pipeline
@@ -13,7 +11,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
 from joblib import dump
+nltk.download(['punkt', 'wordnet'])
 
+
+def clean_filepath(filepath):
+    """Takes a file path and it returns it without file extension, it also gives the name of the table"""
+    if filepath.endswith('.db'):
+        clean_path = filepath[:-3]
+    else:
+        clean_path = filepath
+    table_name = clean_path.split('/')[-1]
+    return clean_path, table_name
 
 
 def load_data(database_filepath):
@@ -23,10 +31,8 @@ def load_data(database_filepath):
     :return: pd.Series, pd.DataFrame, list of strings. X is series with the messages, y is a dataframe with one-hot enconding of the
     categories. category_names is a list of the names of the categories or columns of y.
     """
-    if database_filepath.endswith('.db'):
-        database_filepath = database_filepath[:-3]
-    table_name = database_filepath.split('/')[-1]
-    engine = create_engine('sqlite:///{}.db'.format(database_filepath))
+    db_name, table_name = clean_filepath(database_filepath)
+    engine = create_engine('sqlite:///{}.db'.format(db_name))
     df = pd.read_sql_table(table_name, con=engine)
     X = df.message
     y = df.drop(['id', 'message', 'original', 'genre'], axis=1)

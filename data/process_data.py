@@ -1,6 +1,17 @@
 import sys
+print(sys.path)
 import pandas as pd
 from sqlalchemy import create_engine
+
+
+def clean_filepath(filepath):
+    """Takes a file path and it returns it without file extension, it also gives the name of the table"""
+    if filepath.endswith('.db'):
+        clean_path = filepath[:-3]
+    else:
+        clean_path = filepath
+    table_name = clean_path.split('/')[-1]
+    return clean_path, table_name
 
 
 def load_data(messages_filepath, categories_filepath):
@@ -62,8 +73,8 @@ def save_data(df, database_filename):
     :param database_filename: str, valid file name of the database (no .db ending)
     :return: None
     """
-    engine = create_engine('sqlite:///{}.db'.format(database_filename))
-    table_name = database_filename.split('/')[-1]
+    db_name, table_name = clean_filepath(database_filename)
+    engine = create_engine('sqlite:///{}.db'.format(db_name))
     try:
         df.to_sql(table_name, engine, if_exists='fail', index=False)
     except ValueError:
