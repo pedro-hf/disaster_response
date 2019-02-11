@@ -1,5 +1,4 @@
 import sys
-print(sys.path)
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -32,7 +31,7 @@ def clean_bad_categories(df):
     """Removes categories with one only value from a dataframe, returns the clean dataframe and prints a list of the
     removed columns
     """
-    bad_columns=[]
+    bad_columns = []
     for col in df.columns:
         if len(df[col].unique()) == 1:
             df.drop(col, axis=1, inplace=True)
@@ -93,7 +92,7 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
-        
+
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
         

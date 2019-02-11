@@ -6,11 +6,11 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
-from joblib import dump
 nltk.download(['punkt', 'wordnet'])
 
 
@@ -56,10 +56,12 @@ def build_model():
     Creates a machine learning pipeline including: a vectorizer, a TF-IDF transformer and a classifier
     :return: returns a model
     """
-    model = Pipeline([('vect', CountVectorizer(tokenizer=tokenize, max_df=0.3)),
-                      ('tfidf', TfidfTransformer(use_idf=True)),
-                      ('clf', MultiOutputClassifier(RandomForestClassifier(min_samples_split=2, n_estimators=200)))])
-    return model
+    pipeline = Pipeline([('vect', CountVectorizer(tokenizer=tokenize, max_df=0.5)),
+                         ('tfidf', TfidfTransformer()),
+                         ('clf', MultiOutputClassifier(AdaBoostClassifier(DecisionTreeClassifier(max_depth=1,
+                                                                                                 criterion='gini'),
+                                                                          n_estimators=100)))])
+    return pipeline
 
 
 def evaluate_model(model, X_test, y_test, category_names):
