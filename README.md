@@ -14,6 +14,29 @@ This project was developed using:
 * plotly 3.5.0
 * flask 1.0.2
 * joblib 0.13.1
+### Files:
+The project has the following file structure:
+```
+workspace
+├── README.md
+├── app
+|   ├── run.py
+|   └── templates
+|       ├──go.html
+|       └──master.html
+├── data
+|   ├── disaster_categories.csv
+|   ├── disaster_messages.csv
+|   └── process_data.py
+└── models
+    └── train_classifier.py
+
+```
+* __app__: Folder containing the webapp. Html templates are stored in the subfolder `templates`. running the `run.py` file 
+will start the flask app.
+* __data__: Folder containing the raw data in csv file form as well as the `process_data.py` file which starts an ETL pipeline
+generating a sqlite database.
+* __models__: Folder containing `train_classifier.py` which trains and saves a model to be used in the app.
 
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
@@ -24,7 +47,8 @@ This project was developed using:
         `python models/train_classifier.py data/DisasterResponse.db models/disaster_response.joblib`
 
 2. Run the following command in the app's directory to run your web app.
-    `python run.py`
+    `python run.py`.
+    
     Note that for run.py to run properly the database needs to be called `disaster_response.db` and 
     the model `disaster_response.joblib`
 
