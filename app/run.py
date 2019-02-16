@@ -1,3 +1,5 @@
+import os
+import re
 import json
 import plotly
 import pandas as pd
@@ -18,6 +20,7 @@ nltk.download('stopwords')
 app = Flask(__name__)
 
 
+
 def tokenize(text):
     stop_words = set(stopwords.words('english'))
     tokens = word_tokenize(text)
@@ -30,12 +33,14 @@ def tokenize(text):
     clean_tokens = [w for w in clean_tokens if not w in stop_words]
     return clean_tokens
 
+
 # load data
-engine = create_engine('sqlite:///../data/disaster_response.db')
+workspace_path = re.match(r'(.*/).+/.+.py', os.path.realpath(__file__)).group(1)
+engine = create_engine('sqlite:///{}data/disaster_response.db'.format(workspace_path))
 df = pd.read_sql_table('disaster_response', engine)
 
 # load model
-model = load("../models/disaster_response.joblib")
+model = load("{}/models/disaster_response.joblib".format(workspace_path))
 
 
 # index webpage displays cool visuals and receives user input text for model

@@ -44,7 +44,7 @@ generating a sqlite database.
     - To run ETL pipeline that cleans data and stores in database
         `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/disaster_response.db`
     - To run ML pipeline that trains classifier and saves
-        `python models/train_classifier.py data/DisasterResponse.db models/disaster_response.joblib`
+        `python models/train_classifier.py data/disaster_response.db models/disaster_response`
 
 2. Run the following command in the app's directory to run your web app.
     `python run.py`.

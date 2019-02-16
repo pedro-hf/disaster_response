@@ -11,6 +11,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
+from joblib import dump
 nltk.download(['punkt', 'wordnet'])
 
 
